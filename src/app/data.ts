@@ -11,6 +11,8 @@ export interface Recipe {
   time: string;
   serves: string;
   ingredients: Ingredient[];
+  rating?: number;
+  note?: string;
 }
 
 // Static demo data. No API, no database.
@@ -62,8 +64,16 @@ export const RECIPES: Recipe[] = [
 export class RecipeBook {
   recipes = signal<Recipe[]>([...RECIPES]);
 
-  add(recipe: Recipe) {
+  // Returns the index of the new recipe.
+  add(recipe: Recipe): number {
     this.recipes.update((list) => [...list, recipe]);
+    return this.recipes().length - 1;
+  }
+
+  update(index: number, changes: Partial<Recipe>) {
+    this.recipes.update((list) =>
+      list.map((existing, i) => (i === index ? { ...existing, ...changes } : existing)),
+    );
   }
 }
 

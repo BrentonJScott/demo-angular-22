@@ -1,15 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Recipe, RecipeBook, ShoppingList } from './data';
 
 @Component({
   selector: 'app-recipes',
+  imports: [RouterLink],
   template: `
     <main class="page">
       <div class="page-title">
         <h1>Recipe book</h1>
         <span class="chip">{{ recipes().length }}</span>
-        <button type="button" class="btn btn-outline new-btn">New recipe</button>
+        <a class="btn btn-outline new-btn" routerLink="/recipes/new">New recipe</a>
       </div>
 
       <div class="layout">
@@ -28,7 +29,7 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
               <button
                 type="button"
                 class="recipe"
-                [class.active]="!creating() && i === selected()"
+                [class.active]="i === selected()"
                 (click)="select(i)"
               >
                 <strong>{{ r.name }}</strong>
@@ -36,6 +37,9 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
                 <span class="tags">
                   <span class="badge">{{ r.time }}</span>
                   <span class="badge badge-outline">{{ r.serves }}</span>
+                  @if (r.rating) {
+                    <span class="badge rating">★ {{ r.rating }}</span>
+                  }
                 </span>
               </button>
             }
@@ -43,122 +47,63 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
         </section>
 
         <section>
-          @if (creating()) {
-            <span class="section-label">New recipe</span>
-            <form class="card details" (submit)="save($event)">
-              <div>
-                <label class="label" for="recipe-name">Name</label>
-                <input
-                  class="input"
-                  id="recipe-name"
-                  placeholder="e.g. Tomato soup"
-                  [value]="name()"
-                  (input)="name.set($any($event.target).value)"
-                />
-              </div>
-              <div>
-                <label class="label" for="recipe-description">Description</label>
-                <input
-                  class="input"
-                  id="recipe-description"
-                  placeholder="A short summary"
-                  [value]="description()"
-                  (input)="description.set($any($event.target).value)"
-                />
-              </div>
-              <div class="fields">
-                <div>
-                  <label class="label" for="recipe-time">Time</label>
-                  <input
-                    class="input"
-                    id="recipe-time"
-                    placeholder="30 min"
-                    [value]="time()"
-                    (input)="time.set($any($event.target).value)"
-                  />
-                </div>
-                <div>
-                  <label class="label" for="recipe-serves">Serves</label>
-                  <input
-                    class="input"
-                    id="recipe-serves"
-                    placeholder="4"
-                    [value]="serves()"
-                    (input)="serves.set($any($event.target).value)"
-                  />
-                </div>
-              </div>
-              <div>
-                <label class="label" for="recipe-ingredients">Ingredients</label>
-                <textarea
-                  class="input textarea"
-                  id="recipe-ingredients"
-                  rows="6"
-                  placeholder="One per line, e.g.&#10;Tomatoes, 6&#10;Onion, 1"
-                  [value]="ingredients()"
-                  (input)="ingredients.set($any($event.target).value)"
-                ></textarea>
-              </div>
-              <div class="actions">
-                <button type="button" class="btn btn-outline" (click)="cancelCreate()">
-                  Cancel
-                </button>
-                <button type="button" class="btn btn-primary">Save recipe</button>
-              </div>
-            </form>
-          } @else {
-            <span class="section-label">Details</span>
-            <div class="card details">
-              <div>
-                <h2>{{ recipe().name }}</h2>
-                <p class="muted">{{ recipe().description }}</p>
-                <span class="tags">
-                  <span class="badge">{{ recipe().time }}</span>
-                  <span class="badge badge-outline">Serves {{ servings() }}</span>
+          <span class="section-label">Details</span>
+          <div class="card details">
+            <div>
+              <h2>{{ recipe().name }}</h2>
+              <p class="muted">{{ recipe().description }}</p>
+              <span class="tags">
+                <span class="badge">{{ recipe().time }}</span>
+                <span class="badge badge-outline">Serves {{ servings() }}</span>
+                @if (recipe().rating) {
+                  <span class="badge rating">★ {{ recipe().rating }}</span>
+                }
+              </span>
+              @if (recipe().note) {
+                <p class="muted note">Note: {{ recipe().note }}</p>
+              }
+            </div>
+            <hr />
+            <div>
+              <div class="ingredients-header">
+                <span class="section-label">Ingredients</span>
+                <span class="stepper">
+                  <button
+                    type="button"
+                    class="btn btn-outline step"
+                    aria-label="Fewer servings"
+                    [disabled]="servings() <= 1"
+                    (click)="servings.set(servings() - 1)"
+                  >
+                    −
+                  </button>
+                  <span class="step-value">{{ servings() }}</span>
+                  <button
+                    type="button"
+                    class="btn btn-outline step"
+                    aria-label="More servings"
+                    (click)="servings.set(servings() + 1)"
+                  >
+                    +
+                  </button>
                 </span>
               </div>
-              <hr />
-              <div>
-                <div class="ingredients-header">
-                  <span class="section-label">Ingredients</span>
-                  <span class="stepper">
-                    <button
-                      type="button"
-                      class="btn btn-outline step"
-                      aria-label="Fewer servings"
-                      [disabled]="servings() <= 1"
-                      (click)="servings.set(servings() - 1)"
-                    >
-                      −
-                    </button>
-                    <span class="step-value">{{ servings() }}</span>
-                    <button
-                      type="button"
-                      class="btn btn-outline step"
-                      aria-label="More servings"
-                      (click)="servings.set(servings() + 1)"
-                    >
-                      +
-                    </button>
-                  </span>
-                </div>
-                <ul>
-                  @for (ing of scaledIngredients(); track $index) {
-                    <li>
-                      <span>{{ ing.name }}</span>
-                      <span class="muted">{{ ing.amount }}</span>
-                    </li>
-                  }
-                </ul>
-              </div>
-              <hr />
-              <div class="actions">
-                <button type="button" class="btn btn-primary" (click)="addToList()">
-                  Add to shopping list
-                </button>
-              </div>
+              <ul>
+                @for (ing of scaledIngredients(); track $index) {
+                  <li>
+                    <span>{{ ing.name }}</span>
+                    <span class="muted">{{ ing.amount }}</span>
+                  </li>
+                }
+              </ul>
             </div>
-          }
+            <hr />
+            <div class="actions">
+              <button type="button" class="btn btn-primary" (click)="addToList()">
+                Add to shopping list
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </main>
@@ -166,6 +111,12 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
   styles: `
     .new-btn {
       margin-left: auto;
+    }
+    .rating {
+      background: oklch(0.95 0.07 90);
+    }
+    .note {
+      margin-top: 8px;
     }
     .search {
       margin-bottom: 8px;
@@ -220,16 +171,6 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
       display: flex;
       flex-direction: column;
       gap: 24px;
-    }
-    .fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .textarea {
-      height: auto;
-      padding: 8px 12px;
-      resize: vertical;
     }
     .ingredients-header {
       display: flex;
@@ -298,65 +239,24 @@ export class Recipes {
     }));
   });
 
-  creating = signal(false);
-  name = signal('');
-  description = signal('');
-  time = signal('');
-  serves = signal('');
-  ingredients = signal('');
-
   recipe() {
     return this.recipes()[this.selected()];
   }
 
+  constructor() {
+    // The new recipe flow links back here with ?r=<index> to select the new recipe.
+    const r = Number(inject(ActivatedRoute).snapshot.queryParamMap.get('r'));
+    if (Number.isInteger(r) && r > 0 && r < this.recipes().length) this.select(r);
+  }
+
   select(index: number) {
-    this.creating.set(false);
     this.selected.set(index);
     this.servings.set(servesCount(this.recipe()));
-  }
-
-  startCreate() {
-    this.name.set('');
-    this.description.set('');
-    this.time.set('');
-    this.serves.set('');
-    this.ingredients.set('');
-    this.creating.set(true);
-  }
-
-  cancelCreate() {
-    this.creating.set(false);
-  }
-
-  save(event: Event) {
-    event.preventDefault();
-    const name = this.name().trim();
-    if (!name) return;
-    this.book.add({
-      name,
-      description: this.description().trim(),
-      time: this.time().trim() || '—',
-      serves: 'Serves ' + (this.serves().trim() || '1'),
-      ingredients: this.parseIngredients(),
-    });
-    this.select(this.recipes().length - 1);
   }
 
   addToList() {
     this.shoppingList.addAll(this.scaledIngredients());
     this.router.navigateByUrl('/shopping-list');
-  }
-
-  // One ingredient per line as "name, amount"; amount defaults to 1.
-  private parseIngredients(): Ingredient[] {
-    return this.ingredients()
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [name, ...rest] = line.split(',');
-        return { name: name.trim(), amount: rest.join(',').trim() || '1' };
-      });
   }
 }
 
