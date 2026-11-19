@@ -61,6 +61,10 @@ export const RECIPES: Recipe[] = [
 @Injectable({ providedIn: 'root' })
 export class RecipeBook {
   recipes = signal<Recipe[]>([...RECIPES]);
+
+  add(recipe: Recipe) {
+    this.recipes.update((list) => [...list, recipe]);
+  }
 }
 
 // Shopping list lives in memory only (resets on page refresh).

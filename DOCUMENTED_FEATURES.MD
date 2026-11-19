@@ -4,3 +4,4 @@
 - Add recipe items to shopping list
 - Add a new recipe (name, description, time, serves, and ingredients entered one per line as "name, amount")
 - Search recipes by name
+- Adjust a recipe's servings with +/- buttons; ingredient amounts scale to match, and the scaled amounts are added to the shopping list
