@@ -77,6 +77,10 @@ export class ShoppingList {
     this.items.update((list) => [...list, ...items]);
   }
 
+  update(index: number, item: Ingredient) {
+    this.items.update((list) => list.map((existing, i) => (i === index ? item : existing)));
+  }
+
   remove(index: number) {
     this.items.update((list) => list.filter((_, i) => i !== index));
   }

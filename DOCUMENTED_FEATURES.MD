@@ -1,3 +1,4 @@
 - Add to Shopping list
+- Edit shopping list items (inline name and amount editing)
 - Remove from shopping list
 - Add recipe items to shopping list
