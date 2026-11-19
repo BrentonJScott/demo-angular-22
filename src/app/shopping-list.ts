@@ -72,19 +72,32 @@ import { ShoppingList as ShoppingListService } from './data';
                 <span class="row-actions">
                   <button
                     type="button"
-                    class="btn btn-ghost"
+                    class="btn btn-ghost icon-btn"
+                    title="Edit"
                     [attr.aria-label]="'Edit ' + item.name"
                     (click)="startEdit($index)"
                   >
-                    Edit
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M21.17 6.81a2.83 2.83 0 0 0-4-4L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"
+                      />
+                      <path d="m15 5 4 4" />
+                    </svg>
                   </button>
                   <button
                     type="button"
-                    class="btn btn-ghost"
+                    class="btn btn-ghost icon-btn"
+                    title="Remove"
                     [attr.aria-label]="'Remove ' + item.name"
                     (click)="remove($index)"
                   >
-                    Remove
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 6h18" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path d="M10 11v6" />
+                      <path d="M14 11v6" />
+                    </svg>
                   </button>
                 </span>
               </div>
@@ -138,6 +151,22 @@ import { ShoppingList as ShoppingListService } from './data';
     .row-actions {
       display: flex;
       gap: 4px;
+    }
+    .icon-btn {
+      width: 40px;
+      padding: 0;
+    }
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .icon-btn:hover {
+      color: var(--foreground);
     }
     .item-name {
       font-weight: 500;
