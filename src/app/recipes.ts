@@ -9,9 +9,7 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
       <div class="page-title">
         <h1>Recipe book</h1>
         <span class="chip">{{ recipes().length }}</span>
-        <button type="button" class="btn btn-outline new-btn" (click)="startCreate()">
-          New recipe
-        </button>
+        <button type="button" class="btn btn-outline new-btn">New recipe</button>
       </div>
 
       <div class="layout">
