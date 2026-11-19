@@ -9,7 +9,9 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
       <div class="page-title">
         <h1>Recipe book</h1>
         <span class="chip">{{ recipes().length }}</span>
-        <button type="button" class="btn btn-outline new-btn">New recipe</button>
+        <button type="button" class="btn btn-outline new-btn" (click)="startCreate()">
+          New recipe
+        </button>
       </div>
 
       <div class="layout">
@@ -24,12 +26,12 @@ import { Ingredient, Recipe, RecipeBook, ShoppingList } from './data';
             (input)="search.set($any($event.target).value)"
           />
           <div class="list">
-            @for (r of recipes(); track $index; let i = $index) {
+            @for (r of filtered(); track r.name) {
               <button
                 type="button"
                 class="recipe"
-                [class.active]="!creating() && i === selected()"
-                (click)="select(i)"
+                [class.active]="!creating() && r.name === recipe().name"
+                (click)="selectRecipe(r)"
               >
                 <strong>{{ r.name }}</strong>
                 <span class="muted">{{ r.description }}</span>
@@ -313,6 +315,11 @@ export class Recipes {
     this.creating.set(false);
     this.selected.set(index);
     this.servings.set(servesCount(this.recipe()));
+  }
+
+  selectRecipe(r: Recipe) {
+    const index = this.recipes().findIndex((x) => x.name === r.name);
+    if (index >= 0) this.select(index);
   }
 
   startCreate() {
