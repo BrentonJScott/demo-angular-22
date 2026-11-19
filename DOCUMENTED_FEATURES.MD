@@ -2,5 +2,4 @@
 - Remove from shopping list
 - Clear all items from the shopping list
 - Add recipe items to shopping list
-- Add a new recipe (name, description, time, serves, and ingredients entered one per line as "name, amount")
 - Search recipes by name

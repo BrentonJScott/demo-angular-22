@@ -8,7 +8,7 @@ import { RecipeBook, ShoppingList } from './data';
     <main class="page">
       <div class="page-title">
         <h1>Recipe book</h1>
-        <span class="chip">{{ recipes().length }}</span>
+        <span class="chip">{{ filtered().length }}</span>
       </div>
 
       <div class="layout">
@@ -23,12 +23,12 @@ import { RecipeBook, ShoppingList } from './data';
             (input)="search.set($any($event.target).value)"
           />
           <div class="list">
-            @for (r of recipes(); track $index; let i = $index) {
+            @for (r of filtered(); track r.name) {
               <button
                 type="button"
                 class="recipe"
-                [class.active]="i === selected()"
-                (click)="select(i)"
+                [class.active]="recipe().name === r.name"
+                (click)="select(r)"
               >
                 <strong>{{ r.name }}</strong>
                 <span class="muted">{{ r.description }}</span>
@@ -171,8 +171,9 @@ export class Recipes {
     return this.recipes()[this.selected()];
   }
 
-  select(index: number) {
-    this.selected.set(index);
+  select(recipe: { name: string }) {
+    const index = this.recipes().findIndex((r) => r.name === recipe.name);
+    if (index >= 0) this.selected.set(index);
   }
 
   addToList() {
