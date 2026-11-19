@@ -43,65 +43,35 @@ import { ShoppingList as ShoppingListService } from './data';
       </section>
 
       <section>
-        <span class="section-label">Items</span>
+        <div class="items-header">
+          <span class="section-label">Items</span>
+          @if (list.items().length) {
+            <button type="button" class="btn btn-ghost" (click)="list.clearAll()">Clear all</button>
+          }
+        </div>
         <div class="card table">
           @for (item of list.items(); track $index) {
-            @if (editingIndex() === $index) {
-              <form class="row" (submit)="saveEdit($event)">
-                <input
-                  class="input"
-                  [attr.aria-label]="'Ingredient name'"
-                  [value]="editName()"
-                  (input)="editName.set($any($event.target).value)"
-                />
-                <input
-                  class="input"
-                  [attr.aria-label]="'Amount'"
-                  [value]="editAmount()"
-                  (input)="editAmount.set($any($event.target).value)"
-                />
-                <span class="row-actions">
-                  <button type="button" class="btn btn-ghost" (click)="cancelEdit()">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Save</button>
-                </span>
-              </form>
-            } @else {
-              <div class="row">
-                <span class="item-name">{{ item.name }}</span>
-                <span class="muted">{{ item.amount }}</span>
-                <span class="row-actions">
-                  <button
-                    type="button"
-                    class="btn btn-ghost icon-btn"
-                    title="Edit"
-                    [attr.aria-label]="'Edit ' + item.name"
-                    (click)="startEdit($index)"
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M21.17 6.81a2.83 2.83 0 0 0-4-4L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"
-                      />
-                      <path d="m15 5 4 4" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-ghost icon-btn"
-                    title="Remove"
-                    [attr.aria-label]="'Remove ' + item.name"
-                    (click)="remove($index)"
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-                      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      <path d="M10 11v6" />
-                      <path d="M14 11v6" />
-                    </svg>
-                  </button>
-                </span>
-              </div>
-            }
+            <div class="row">
+              <span class="item-name">{{ item.name }}</span>
+              <span class="muted">{{ item.amount }}</span>
+              <span class="row-actions">
+                <button
+                  type="button"
+                  class="btn btn-ghost icon-btn"
+                  title="Remove"
+                  [attr.aria-label]="'Remove ' + item.name"
+                  (click)="remove($index)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                  </svg>
+                </button>
+              </span>
+            </div>
           } @empty {
             <p class="muted empty">Your shopping list is empty.</p>
           }
@@ -132,6 +102,11 @@ import { ShoppingList as ShoppingListService } from './data';
       display: flex;
       justify-content: flex-end;
       gap: 12px;
+    }
+    .items-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .table {
       padding: 0;
@@ -181,9 +156,6 @@ export class ShoppingListPage {
   list = inject(ShoppingListService);
   name = signal('');
   amount = signal('');
-  editingIndex = signal<number | null>(null);
-  editName = signal('');
-  editAmount = signal('');
 
   add(event: Event) {
     event.preventDefault();
@@ -198,28 +170,7 @@ export class ShoppingListPage {
     this.amount.set('');
   }
 
-  startEdit(index: number) {
-    const item = this.list.items()[index];
-    this.editingIndex.set(index);
-    this.editName.set(item.name);
-    this.editAmount.set(item.amount);
-  }
-
-  saveEdit(event: Event) {
-    event.preventDefault();
-    const index = this.editingIndex();
-    const name = this.editName().trim();
-    if (index === null || !name) return;
-    this.list.update(index, { name, amount: this.editAmount().trim() || '1' });
-    this.cancelEdit();
-  }
-
-  cancelEdit() {
-    this.editingIndex.set(null);
-  }
-
   remove(index: number) {
-    this.cancelEdit();
     this.list.remove(index);
   }
 }

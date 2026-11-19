@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { RecipeBook, ShoppingList } from './data';
 
@@ -7,13 +7,21 @@ import { RecipeBook, ShoppingList } from './data';
   template: `
     <main class="page">
       <div class="page-title">
-        <h1>Recipes</h1>
+        <h1>Recipe book</h1>
         <span class="chip">{{ recipes().length }}</span>
       </div>
 
       <div class="layout">
         <section>
           <span class="section-label">All recipes</span>
+          <input
+            class="input search"
+            type="search"
+            placeholder="Search recipes"
+            aria-label="Search recipes"
+            [value]="search()"
+            (input)="search.set($any($event.target).value)"
+          />
           <div class="list">
             @for (r of recipes(); track $index; let i = $index) {
               <button
@@ -68,6 +76,9 @@ import { RecipeBook, ShoppingList } from './data';
     </main>
   `,
   styles: `
+    .search {
+      margin-bottom: 8px;
+    }
     .layout {
       display: grid;
       grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
@@ -150,6 +161,11 @@ export class Recipes {
 
   recipes = this.book.recipes;
   selected = signal(0);
+  search = signal('');
+  filtered = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    return this.recipes().filter((r) => r.name.toLowerCase().includes(term));
+  });
 
   recipe() {
     return this.recipes()[this.selected()];

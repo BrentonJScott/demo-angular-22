@@ -17,7 +17,7 @@ export interface Recipe {
 export const RECIPES: Recipe[] = [
   {
     name: 'Spaghetti carbonara',
-    description: 'Silky egg and pecorino sauce with crisp guanciale and plenty of black pepper.',
+    description: 'A Roman classic: creamy egg and pecorino, crispy guanciale, lots of pepper.',
     time: '25 min',
     serves: 'Serves 4',
     ingredients: [
@@ -44,7 +44,7 @@ export const RECIPES: Recipe[] = [
   },
   {
     name: 'Vegetable stir-fry',
-    description: 'Crunchy vegetables tossed in a quick soy, ginger and garlic sauce.',
+    description: 'Quick weeknight veg with a punchy soy, ginger and garlic glaze.',
     time: '20 min',
     serves: 'Serves 2',
     ingredients: [
@@ -82,11 +82,11 @@ export class ShoppingList {
     this.items.update((list) => [...list, ...items]);
   }
 
-  update(index: number, item: Ingredient) {
-    this.items.update((list) => list.map((existing, i) => (i === index ? item : existing)));
-  }
-
   remove(index: number) {
     this.items.update((list) => list.filter((_, i) => i !== index));
+  }
+
+  clearAll() {
+    this.items.set([]);
   }
 }
