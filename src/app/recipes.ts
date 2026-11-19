@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Ingredient, RecipeBook, ShoppingList } from './data';
+import { RecipeBook, ShoppingList } from './data';
 
 @Component({
   selector: 'app-recipes',
@@ -9,9 +9,6 @@ import { Ingredient, RecipeBook, ShoppingList } from './data';
       <div class="page-title">
         <h1>Recipes</h1>
         <span class="chip">{{ recipes().length }}</span>
-        <button type="button" class="btn btn-outline new-btn" (click)="startCreate()">
-          New recipe
-        </button>
       </div>
 
       <div class="layout">
@@ -22,7 +19,7 @@ import { Ingredient, RecipeBook, ShoppingList } from './data';
               <button
                 type="button"
                 class="recipe"
-                [class.active]="!creating() && i === selected()"
+                [class.active]="i === selected()"
                 (click)="select(i)"
               >
                 <strong>{{ r.name }}</strong>
@@ -37,100 +34,35 @@ import { Ingredient, RecipeBook, ShoppingList } from './data';
         </section>
 
         <section>
-          @if (creating()) {
-            <span class="section-label">New recipe</span>
-            <form class="card details" (submit)="save($event)">
-              <div>
-                <label class="label" for="recipe-name">Name</label>
-                <input
-                  class="input"
-                  id="recipe-name"
-                  placeholder="e.g. Tomato soup"
-                  [value]="name()"
-                  (input)="name.set($any($event.target).value)"
-                />
-              </div>
-              <div>
-                <label class="label" for="recipe-description">Description</label>
-                <input
-                  class="input"
-                  id="recipe-description"
-                  placeholder="A short summary"
-                  [value]="description()"
-                  (input)="description.set($any($event.target).value)"
-                />
-              </div>
-              <div class="fields">
-                <div>
-                  <label class="label" for="recipe-time">Time</label>
-                  <input
-                    class="input"
-                    id="recipe-time"
-                    placeholder="30 min"
-                    [value]="time()"
-                    (input)="time.set($any($event.target).value)"
-                  />
-                </div>
-                <div>
-                  <label class="label" for="recipe-serves">Serves</label>
-                  <input
-                    class="input"
-                    id="recipe-serves"
-                    placeholder="4"
-                    [value]="serves()"
-                    (input)="serves.set($any($event.target).value)"
-                  />
-                </div>
-              </div>
-              <div>
-                <label class="label" for="recipe-ingredients">Ingredients</label>
-                <textarea
-                  class="input textarea"
-                  id="recipe-ingredients"
-                  rows="6"
-                  placeholder="One per line, e.g.&#10;Tomatoes, 6&#10;Onion, 1"
-                  [value]="ingredients()"
-                  (input)="ingredients.set($any($event.target).value)"
-                ></textarea>
-              </div>
-              <div class="actions">
-                <button type="button" class="btn btn-outline" (click)="cancelCreate()">
-                  Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">Save recipe</button>
-              </div>
-            </form>
-          } @else {
-            <span class="section-label">Details</span>
-            <div class="card details">
-              <div>
-                <h2>{{ recipe().name }}</h2>
-                <p class="muted">{{ recipe().description }}</p>
-                <span class="tags">
-                  <span class="badge">{{ recipe().time }}</span>
-                  <span class="badge badge-outline">{{ recipe().serves }}</span>
-                </span>
-              </div>
-              <hr />
-              <div>
-                <span class="section-label">Ingredients</span>
-                <ul>
-                  @for (ing of recipe().ingredients; track ing.name) {
-                    <li>
-                      <span>{{ ing.name }}</span>
-                      <span class="muted">{{ ing.amount }}</span>
-                    </li>
-                  }
-                </ul>
-              </div>
-              <hr />
-              <div class="actions">
-                <button type="button" class="btn btn-primary" (click)="addToList()">
-                  Add to shopping list
-                </button>
-              </div>
+          <span class="section-label">Details</span>
+          <div class="card details">
+            <div>
+              <h2>{{ recipe().name }}</h2>
+              <p class="muted">{{ recipe().description }}</p>
+              <span class="tags">
+                <span class="badge">{{ recipe().time }}</span>
+                <span class="badge badge-outline">{{ recipe().serves }}</span>
+              </span>
             </div>
-          }
+            <hr />
+            <div>
+              <span class="section-label">Ingredients</span>
+              <ul>
+                @for (ing of recipe().ingredients; track ing.name) {
+                  <li>
+                    <span>{{ ing.name }}</span>
+                    <span class="muted">{{ ing.amount }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+            <hr />
+            <div class="actions">
+              <button type="button" class="btn btn-primary" (click)="addToList()">
+                Add to shopping list
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </main>
@@ -209,19 +141,6 @@ import { Ingredient, RecipeBook, ShoppingList } from './data';
       justify-content: flex-end;
       gap: 12px;
     }
-    .new-btn {
-      margin-left: auto;
-    }
-    .fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .textarea {
-      height: auto;
-      padding: 8px 12px;
-      resize: vertical;
-    }
   `,
 })
 export class Recipes {
@@ -231,60 +150,13 @@ export class Recipes {
 
   recipes = this.book.recipes;
   selected = signal(0);
-  creating = signal(false);
-  name = signal('');
-  description = signal('');
-  time = signal('');
-  serves = signal('');
-  ingredients = signal('');
 
   recipe() {
     return this.recipes()[this.selected()];
   }
 
   select(index: number) {
-    this.creating.set(false);
     this.selected.set(index);
-  }
-
-  startCreate() {
-    this.name.set('');
-    this.description.set('');
-    this.time.set('');
-    this.serves.set('');
-    this.ingredients.set('');
-    this.creating.set(true);
-  }
-
-  cancelCreate() {
-    this.creating.set(false);
-  }
-
-  save(event: Event) {
-    event.preventDefault();
-    const name = this.name().trim();
-    if (!name) return;
-    this.book.add({
-      name,
-      description: this.description().trim(),
-      time: this.time().trim() || '—',
-      serves: 'Serves ' + (this.serves().trim() || '1'),
-      ingredients: this.parseIngredients(),
-    });
-    this.selected.set(this.recipes().length - 1);
-    this.creating.set(false);
-  }
-
-  // One ingredient per line as "name, amount"; amount defaults to 1.
-  private parseIngredients(): Ingredient[] {
-    return this.ingredients()
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [name, ...rest] = line.split(',');
-        return { name: name.trim(), amount: rest.join(',').trim() || '1' };
-      });
   }
 
   addToList() {
